@@ -45,7 +45,7 @@ const App = () => {
 
   const handleAvgGood = () =>  setAverage((good + 1) + (bad *  -1)/(total + 1))
   const handleAvgNeutral = () => setAverage((good + (bad * -1))/ (total + 1))
-  const handleAvgBad = () => setAverage((good + (bad + 1) *  -1)/(total + 1))
+  const handleAvgBad = () => setAverage((good + ((bad + 1) *  -1))/(total + 1))
   const handleTotal = () => setTotal(total + 1)
   const handlePosNonGood = () => setPositive(good/(total + 1) * 100)
   const handlePosGood = () => setPositive((good + 1)/(total + 1) * 100)
