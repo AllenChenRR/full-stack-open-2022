@@ -1,109 +1,81 @@
 import { useState } from 'react'
-const Header = (props) => <h1>{props.header}</h1>
-const Section = (props) => <h2>{props.section}</h2>
-const Button = (props) => <button onClick={props.onClick}>{props.text}</button>
-const StatisticsLine = (props) => {
-  return <tr>
-    <td>{props.text}</td> 
-    <td>{props.value} {props.symbol}</td>
-  </tr>
-}
-
-const Statistics = (props) => {
-  if (props.values.total == 0) {
-    return <div>No feedback given</div>
-  }
-  return(
-    <table>
-      <tbody>
-        <StatisticsLine text={props.titles.good} value={props.values.good}></StatisticsLine>
-        <StatisticsLine text={props.titles.neutral} value={props.values.neutral}></StatisticsLine>
-        <StatisticsLine text={props.titles.bad} value={props.values.bad}></StatisticsLine>
-        <StatisticsLine text={props.titles.total} value ={props.values.total}></StatisticsLine>
-        <StatisticsLine text={props.titles.average} value={props.values.average}></StatisticsLine>
-        <StatisticsLine text={props.titles.positive} value={props.values.positive} symbol="%"></StatisticsLine>
-      </tbody>
-    </table>
+const AnecdoteButton = (props) => {
+  return (
+    <button onClick={props.onClick}>
+      Next Anecdote
+    </button>
   )
 }
 
+const VoteButton = (props) => {
+  return (
+    <button onClick={props.onClick}>Vote</button>
+  )
+}
+
+const DisplayMostVotes = (props) => {
+  const mostVotesHeader = "Anecdote with most votes"
+  if (props.mostVoted >= 0) {
+    return (
+      <div>
+        <h2>{mostVotesHeader}</h2>
+        <p>{props.anecdotes[props.mostVoted]}</p>
+        <p>has {props.votes[props.mostVoted]} votes</p>
+      </div>
+    )
+  }
+}
+
+const DisplayVotes = (props) => {
+    if (props.selected in props.votes) {
+      return (<p>has {props.votes[props.selected]} votes</p>)
+    } else {
+      return (<p>has 0 votes</p>)
+    }
+}
 const App = () => {
-  const header = "Unicafe Feedback"
-  const statTitle = "Statistics"
-  const goodTitle = "Good"
-  const badTitle = "Bad"
-  const neutralTitle = "Neutral"
-  const averageTitle = "Average"
-  const positiveTitle = "Positive"
-  const totalTitle = "All"
-  const [good, setGood] = useState(0)
-  const [neutral, setNeutral] = useState(0);
-  const [bad, setBad] = useState(0)
-  const [average, setAverage] = useState(0)
-  const [positive, setPositive] = useState(0)
-  const [total, setTotal] = useState(0)
-
-  const handleAvgGood = () =>  setAverage((good + 1) + (bad *  -1)/(total + 1))
-  const handleAvgNeutral = () => setAverage((good + (bad * -1))/ (total + 1))
-  const handleAvgBad = () => setAverage((good + ((bad + 1) *  -1))/(total + 1))
-  const handleTotal = () => setTotal(total + 1)
-  const handlePosNonGood = () => setPositive(good/(total + 1) * 100)
-  const handlePosGood = () => setPositive((good + 1)/(total + 1) * 100)
-
-  const handleGood = () => {
-    setGood(good + 1)
-    setAverage()
-    handleAvgGood()
-    handlePosGood()
-    handleTotal()
-  }
-
-  const handleBad  = () => {
-    setBad(bad + 1)
-    handleAvgBad()
-    handlePosNonGood()
-    handleTotal()
-  }
+  const anecdotes = [
+    'If it hurts, do it more often.',
+    'Adding manpower to a late software project makes it later!',
+    'The first 90 percent of the code accounts for the first 10 percent of the development time...The remaining 10 percent of the code accounts for the other 90 percent of the development time.',
+    'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.',
+    'Premature optimization is the root of all evil.',
+    'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.',
+    'Programming without an extremely heavy use of console.log is same as if a doctor would refuse to use x-rays or blood tests when diagnosing patients.'
+  ]
+  const anecdoteHeader = "Anecdote of the day"
   
-  const handleNeutral = () => {
-    setNeutral(neutral + 1)
-    handleAvgNeutral()
-    handlePosNonGood()
-    handleTotal()
+  const [selected, setSelected] = useState(0)
+  const [votes, setVotes] = useState({})
+  const [mostVoted, setMostVoted] = useState(-1)
+  // define onclick function to generate random number
+  const handleSelected = () => {
+    let rand_selected = Math.floor(Math.random() * anecdotes.length)
+    setSelected(rand_selected)
   }
 
-  
-  const titles = {
-    good: goodTitle,
-    bad: badTitle,
-    neutral: neutralTitle,
-    positive: positiveTitle,
-    average: averageTitle,
-    total: totalTitle
+  const handleVotes = () => {
+    let copy = {...votes}
+    if (!(selected in votes)) {
+      copy[selected] = 0
+    }
+    copy[selected] += 1
+    let new_most = Object.keys(copy).reduce((a, b) => copy[a] > copy[b] ? a : b)
+    setVotes(copy)
+    setMostVoted(new_most)
   }
-  const values = {
-    good: good,
-    bad: bad,
-    neutral: neutral,
-    total: total,
-    average: average,
-    positive: positive,
-  }
-
   return (
     <div>
-      <Header header={header}></Header>
-      <div> 
-        <Button onClick={handleGood} text={goodTitle}></Button>
-        <Button onClick={handleNeutral} text={neutralTitle}></Button>
-        <Button onClick={handleBad} text={badTitle}></Button>
-
+      <h2>{anecdoteHeader}</h2>
+      {anecdotes[selected]}
+      <DisplayVotes selected ={selected} votes={votes}></DisplayVotes>
+      <div>
+        <VoteButton onClick={handleVotes}></VoteButton>
+        <AnecdoteButton onClick={handleSelected}></AnecdoteButton>
       </div>
-      <Section section={statTitle}></Section>
-      <Statistics values={values} titles={titles}></Statistics>
+        <DisplayMostVotes anecdotes={anecdotes} mostVoted={mostVoted} votes={votes}></DisplayMostVotes>
     </div>
   )
 }
-
 
 export default App
